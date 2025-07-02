@@ -8,6 +8,6 @@ Test 2
 
 ## local
 
-Time updated : ```
+Last updated on: ```
 
 1. trying branching
