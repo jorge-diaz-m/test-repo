@@ -1,0 +1,28 @@
+name: 'Daily README Update'
+
+on:
+  schedule:
+    # Runs "at 00:00" (midnight) UTC every day
+    - cron: '30 16 * * *'
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+
+      - name: 'Update README with current date'
+        # This command finds the tag and replaces it
+        # with the current date in YYYY-MM-DD format.
+        run: |
+          sed -i "s||$(date +'%Y-%m-%d')|g" README.md
+
+      - name: 'Commit and push changes'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          # Only commit if there are changes
+          git diff --staged --quiet || git commit -m 'Docs: Update date in README'
+          git push
