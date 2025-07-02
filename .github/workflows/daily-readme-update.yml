@@ -3,7 +3,7 @@ name: 'Daily README Update'
 on:
   schedule:
     # Runs "at 00:00" (midnight) UTC every day
-    - cron: '02 08 * * *'
+    - cron: '15 08 * * *'
 
 jobs:
   update-readme:
