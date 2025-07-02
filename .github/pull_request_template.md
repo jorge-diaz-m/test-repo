@@ -22,7 +22,7 @@ Please include a summary of the changes and the related issue.
 
 ## Related Issues
 
-Closes #
+change to test the PR template
 
 ## Screenshots (if applicable)
 
