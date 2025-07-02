@@ -1,14 +1,24 @@
-name: Markdown Lint
+name: 'Lint Markdown Files'
+
 on:
-    pull_request:
-      branches:
-        - main  # Or your default branch
+  push:
+  pull_request:
+
 jobs:
-       lint:
-         runs-on: ubuntu-latest
-         steps:
-           - uses: actions/checkout@v4
-           - name: Install markdownlint-cli
-             run: npm install -g markdownlint-cli
-           - name: Lint Markdown files
-             run: markdownlint '**/*.md'
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+
+      - name: 'Set up Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 'Install markdownlint-cli'
+        run: npm install -g markdownlint-cli
+
+      - name: 'Run markdownlint'
+        # This command checks all files ending in .md
+        run: markdownlint "**/*.md"
