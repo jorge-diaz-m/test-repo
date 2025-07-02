@@ -23,6 +23,7 @@ Please include a summary of the changes and the related issue.
 ## Related Issues
 
 change to test the PR template
+Added a line to check for the workflow
 
 ## Screenshots (if applicable)
 
