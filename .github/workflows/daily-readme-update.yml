@@ -16,7 +16,7 @@ jobs:
         # This command finds the tag and replaces it
         # with the current date in YYYY-MM-DD format.
         run: |
-          sed -i "s||$(date +'%Y-%m-%d')|g" README.md
+          sed -i "s|{{```}}|$(date +'%Y-%m-%d')|g" README.md
 
       - name: 'Commit and push changes'
         run: |
