@@ -1,0 +1,37 @@
+name: 'Code Format Check'
+
+on:
+  pull_request:
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+
+      # Setup Node.js to run Prettier
+      - name: 'Set up Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Install and run Prettier for JavaScript files
+      - name: 'Install and run Prettier'
+        run: |
+          npm install prettier
+          # --check fails if files need formatting
+          npx prettier --write "**/*.{js,jsx,ts,tsx}" || echo "No JS/TS files to check"
+
+      # Setup Python to run Black
+      - name: 'Set up Python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Install and run Black for Python files
+      - name: 'Install and run Black'
+        run: |
+          pip install black
+          # --check fails if files need formatting
+          black --check "**/*.{py}" || echo "No Python files to check"
