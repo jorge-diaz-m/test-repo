@@ -8,6 +8,6 @@ Test 25 updated cron time
 
 ## local
 
-Last updated on: ```
+Last updated on: DATE
 
 1. trying branching
