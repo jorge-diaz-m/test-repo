@@ -22,3 +22,6 @@ jobs:
       - name: 'Run markdownlint'
         # This command checks all files ending in .md
         run: markdownlint "**/*.md"
+
+      - name: 'Show current UTC time'
+        run: date -u
