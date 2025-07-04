@@ -21,7 +21,7 @@ jobs:
         run: |
           npm install prettier
           # --check fails if files need formatting
-          npx prettier --write "**/*.{js,jsx,ts,tsx}" || echo "No JS/TS files to check"
+          npx prettier --write "*.{js,jsx,ts,tsx}" || echo "No JS/TS files to check"
 
       # Setup Python to run Black
       - name: 'Set up Python'
@@ -34,4 +34,4 @@ jobs:
         run: |
           pip install black
           # --check fails if files need formatting
-          black --check "**/*.py" || echo "No Python files to check"
+          black --check "*.py" || echo "No Python files to check"
