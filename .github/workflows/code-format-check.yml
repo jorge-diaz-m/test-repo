@@ -34,4 +34,4 @@ jobs:
         run: |
           pip install black
           # --check fails if files need formatting
-          black --check "**/*.{py}" || echo "No Python files to check"
+          black --check "**/*.py" || echo "No Python files to check"
