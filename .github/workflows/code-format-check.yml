@@ -21,7 +21,7 @@ jobs:
         run: |
           npm install prettier
           # --check fails if files need formatting
-          npx prettier --write "*.{js,jsx,ts,tsx}" || echo "No JS/TS files to check"
+          npx prettier --write *.{js,jsx,ts,tsx} || echo "No JS/TS files to check"
 
       # Setup Python to run Black
       - name: 'Set up Python'
@@ -35,3 +35,9 @@ jobs:
           pip install black
           # --check fails if files need formatting
           black --check *.py || echo "No Python files to check"
+          black .
+          # Optionally, commit and push changes if any files were reformatted
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git diff --staged --quiet || (git commit -m 'chore: auto-format code' && git push)
