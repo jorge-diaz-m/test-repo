@@ -1,8 +1,8 @@
 name: 'Code Format Check'
 
 on:
-  pull_request:
-
+  push:
+  
 jobs:
   format-check:
     runs-on: ubuntu-latest
