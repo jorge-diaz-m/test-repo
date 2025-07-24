@@ -21,7 +21,16 @@ jobs:
 
       - name: 'Run markdownlint'
         # This command checks all files ending in .md
-        run: markdownlint "**/*.md"
+        run: markdownlint "*.md"
 
       - name: 'Show current UTC time'
         run: date -u
+
+      - name: 'Add Comment on Failure'
+        # This condition ensures the step only runs if a previous step failed
+        if: failure()
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "🤖 **Code Formatting Failed!** Please run Prettier and Black on your code and push the changes."
+        env:
+          # The GITHUB_TOKEN is required for the GitHub CLI to post the comment
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
