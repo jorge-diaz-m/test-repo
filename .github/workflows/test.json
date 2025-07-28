@@ -1,0 +1,13 @@
+{
+  "name": "sample-dependabot-project",
+  "version": "1.0.0",
+  "description": "A test repo to trigger Dependabot",
+  "main": "index.js",
+  "dependencies": {
+    "lodash": "4.17.15"
+  },
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "license": "MIT"
+}
