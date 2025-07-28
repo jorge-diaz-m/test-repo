@@ -4,7 +4,7 @@
   "description": "A test repo to trigger Dependabot",
   "main": "index.js",
   "dependencies": {
-    "lodash": "4.17.15"
+    "lodash": "4.17.10"
   },
   "scripts": {
     "test": "echo \"No tests yet\" && exit 0"
