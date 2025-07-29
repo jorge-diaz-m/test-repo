@@ -4,6 +4,7 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 #test dependabot
 #test dependabotgit
+#test 2
 version: 2
 updates:
   - package-ecosystem: "pip"
