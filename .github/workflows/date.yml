@@ -1,0 +1,116 @@
+name: Update Project Field on PR Open
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  update-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get current date
+        id: get_date
+        run: echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+      - name: Update project field
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_FOR_PROJECTS }}  # <-- Needs project access
+          script: |
+            const date = "${{ steps.get_date.outputs.date }}";
+
+            // Replace with your project and field names
+            const projectNumber = 1;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Step 1: Get the project ID
+            const projects = await github.graphql(`
+              query($owner: String!) {
+                organization(login: $owner) {
+                  projectsV2(first: 10) {
+                    nodes {
+                      id
+                      title
+                      number
+                    }
+                  }
+                }
+              }`, {
+                owner
+            });
+
+            const project = projects.organization.projectsV2.nodes.find(p => p.number === projectNumber);
+            if (!project) {
+              throw new Error("Project not found");
+            }
+
+            // Step 2: Find the project item for this PR
+            const items = await github.graphql(`
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    items(first: 20) {
+                      nodes {
+                        id
+                        content {
+                          ... on PullRequest {
+                            number
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`, {
+                projectId: project.id
+            });
+
+            const prItem = items.node.items.nodes.find(i => i.content?.number === context.issue.number);
+            if (!prItem) {
+              throw new Error("PR is not yet added to the project.");
+            }
+
+            // Step 3: Get field ID for 'Opened At'
+            const fields = await github.graphql(`
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    fields(first: 20) {
+                      nodes {
+                        id
+                        name
+                      }
+                    }
+                  }
+                }
+              }`, {
+                projectId: project.id
+            });
+
+            const field = fields.node.fields.nodes.find(f => f.name === "Opened At");
+            if (!field) {
+              throw new Error("Custom field 'Opened At' not found");
+            }
+
+            // Step 4: Update the field value
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { text: $value }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `, {
+              projectId: project.id,
+              itemId: prItem.id,
+              fieldId: field.id,
+              value: date
+            });
