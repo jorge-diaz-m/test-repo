@@ -9,21 +9,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get current date
+      - name: Get current date in ISO 8601
         id: get_date
         run: echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
-      - name: Update project field
+      - name: Update 'Date' field in GitHub Project
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.DATE }}  # This should be a classic PAT with `project:write`
+          github-token: ${{ secrets.DATE }}  # Classic PAT with `project:write`
           script: |
             const date = "${{ steps.get_date.outputs.date }}";
 
-            const projectNumber = 1;
+            const projectNumber = 1;  // Set your project number here
             const owner = context.repo.owner;
 
-            // Step 1: Get the project
+            // Step 1: Get project ID from user's projects
             const projects = await github.graphql(`
               query($owner: String!) {
                 user(login: $owner) {
@@ -39,9 +39,11 @@ jobs:
             `, { owner });
 
             const project = projects.user.projectsV2.nodes.find(p => p.number === projectNumber);
-            if (!project) throw new Error("Project not found for user: " + owner);
+            if (!project) {
+              throw new Error(" Project not found for user: " + owner);
+            }
 
-            // Step 2: Find the project item for this PR
+            // Step 2: Find the item in the project that matches this PR
             const items = await github.graphql(`
               query($projectId: ID!) {
                 node(id: $projectId) {
@@ -62,9 +64,11 @@ jobs:
             `, { projectId: project.id });
 
             const prItem = items.node.items.nodes.find(i => i.content?.number === context.issue.number);
-            if (!prItem) throw new Error(" PR is not added to the project yet.");
+            if (!prItem) {
+              throw new Error(" PR is not added to the project yet.");
+            }
 
-            // Step 3: Get the field ID for "Date"
+            // Step 3: Get field ID for "Date"
             const fields = await github.graphql(`
               query($projectId: ID!) {
                 node(id: $projectId) {
@@ -83,16 +87,18 @@ jobs:
             `, { projectId: project.id });
 
             const field = fields.node.fields.nodes.find(f => f.name === "Date");
-            if (!field) throw new Error(" Field 'Date' not found.");
+            if (!field) {
+              throw new Error("Field 'Date' not found.");
+            }
 
-            // Step 4: Set the field value
+            // Step 4: Update the field value (for date-type fields!)
             await github.graphql(`
-              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: Date!) {
                 updateProjectV2ItemFieldValue(input: {
                   projectId: $projectId,
                   itemId: $itemId,
                   fieldId: $fieldId,
-                  value: { text: $value }
+                  value: { date: $value }
                 }) {
                   projectV2Item {
                     id
@@ -106,4 +112,5 @@ jobs:
               value: date
             });
 
-            console.log(` Set 'Date' field to ${date}`);
+            console.log(`Set 'Date' field to ${date}`);
+
