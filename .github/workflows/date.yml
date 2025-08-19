@@ -16,15 +16,14 @@ jobs:
       - name: Update project field
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.DATE }}  # <-- This should be a classic PAT with `project:write`
+          github-token: ${{ secrets.DATE }}  # This should be a classic PAT with `project:write`
           script: |
             const date = "${{ steps.get_date.outputs.date }}";
 
-            // Replace with your actual project number
             const projectNumber = 1;
             const owner = context.repo.owner;
 
-            // Step 1: Get the project ID from the user's projects
+            // Step 1: Get the project
             const projects = await github.graphql(`
               query($owner: String!) {
                 user(login: $owner) {
@@ -36,16 +35,13 @@ jobs:
                     }
                   }
                 }
-              }`, {
-                owner
-            });
+              }
+            `, { owner });
 
             const project = projects.user.projectsV2.nodes.find(p => p.number === projectNumber);
-            if (!project) {
-              throw new Error(" Project not found for user: " + owner);
-            }
+            if (!project) throw new Error("Project not found for user: " + owner);
 
-            // Step 2: Find the project item corresponding to this PR
+            // Step 2: Find the project item for this PR
             const items = await github.graphql(`
               query($projectId: ID!) {
                 node(id: $projectId) {
@@ -62,38 +58,34 @@ jobs:
                     }
                   }
                 }
-              }`, {
-                projectId: project.id
-            });
+              }
+            `, { projectId: project.id });
 
             const prItem = items.node.items.nodes.find(i => i.content?.number === context.issue.number);
-            if (!prItem) {
-              throw new Error("❌ PR is not added to the project yet.");
-            }
+            if (!prItem) throw new Error(" PR is not added to the project yet.");
 
-            // Step 3: Get the field ID for 'Opened At'
+            // Step 3: Get the field ID for "Date"
             const fields = await github.graphql(`
               query($projectId: ID!) {
                 node(id: $projectId) {
                   ... on ProjectV2 {
                     fields(first: 20) {
                       nodes {
-                        id
-                        name
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
                       }
                     }
                   }
                 }
-              }`, {
-                projectId: project.id
-            });
+              }
+            `, { projectId: project.id });
 
-            const field = fields.node.fields.nodes.find(f => f.name === "Opened At");
-            if (!field) {
-              throw new Error(" Field 'Opened At' not found.");
-            }
+            const field = fields.node.fields.nodes.find(f => f.name === "Date");
+            if (!field) throw new Error(" Field 'Date' not found.");
 
-            // Step 4: Update the custom field value
+            // Step 4: Set the field value
             await github.graphql(`
               mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
                 updateProjectV2ItemFieldValue(input: {
@@ -114,4 +106,4 @@ jobs:
               value: date
             });
 
-            console.log(` Set 'Opened At' field to ${date}`);
+            console.log(` Set 'Date' field to ${date}`);
