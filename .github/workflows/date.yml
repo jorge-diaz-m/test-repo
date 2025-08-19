@@ -16,7 +16,7 @@ jobs:
       - name: Update project field
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.PAT_FOR_PROJECTS }}  # <-- Needs project access
+          github-token: ${{ secrets.DATE }}  # <-- Needs project access
           script: |
             const date = "${{ steps.get_date.outputs.date }}";
 
